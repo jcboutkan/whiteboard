@@ -184,6 +184,13 @@ function initSocket() {
     if (studentId) showEmoteOnTile(studentId, emote);
   });
 
+  socket.on('emote-cancelled', ({ studentId }) => {
+    const badge = document.getElementById(`emote-${studentId}`);
+    if (badge) { badge.classList.add('hidden'); badge.textContent = ''; }
+    const st = students.get(studentId);
+    if (st) st.activeEmote = null;
+  });
+
   // Alerts
   socket.on('student-tab-hidden', ({ studentId, name, time }) => {
     const st = students.get(studentId);
@@ -465,6 +472,7 @@ function createStudentTile(studentId, name) {
     <div class="tile-header">
       <span class="online-dot" id="dot-${studentId}"></span>
       <span class="tile-name">${escHtml(name)}</span>
+      <button class="tile-emote-badge hidden" id="emote-${studentId}" onclick="dismissEmote('${studentId}')" title="Klik om te bevestigen"></button>
       <div style="flex:1;"></div>
       <button class="btn-icon" onclick="clearStudentCanvas('${studentId}')" title="Wissen">🗑️</button>
       <button class="btn-icon" onclick="undoStudentCanvas('${studentId}')" title="Ongedaan">↩</button>
@@ -524,15 +532,22 @@ function updateStudentCount() {
 }
 
 function showEmoteOnTile(studentId, emote) {
-  const tile = document.getElementById(`tile-${studentId}`);
-  if (!tile) return;
-  const el = document.createElement('div');
-  el.className = 'emote-popup';
-  el.textContent = emote;
-  tile.style.position = 'relative';
-  tile.appendChild(el);
-  setTimeout(() => el.remove(), 2200);
+  const badge = document.getElementById(`emote-${studentId}`);
+  if (!badge) return;
+  const st = students.get(studentId);
+  if (st) st.activeEmote = emote;
+  badge.textContent = emote;
+  badge.classList.remove('hidden');
 }
+
+function dismissEmote(studentId) {
+  const badge = document.getElementById(`emote-${studentId}`);
+  if (badge) { badge.classList.add('hidden'); badge.textContent = ''; }
+  const st = students.get(studentId);
+  if (st) st.activeEmote = null;
+  socket && socket.emit('emote-dismiss', { studentId });
+}
+window.dismissEmote = dismissEmote;
 
 // ── CLEAR / UNDO STUDENT ──────────────────────────────────────────────────────
 function clearStudentCanvas(studentId) {

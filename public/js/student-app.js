@@ -14,6 +14,7 @@ let focusEngine  = null;   // teacher's canvas replayed for focus mode
 let approved     = false;
 let mathPendingPos = null;
 let filledMode = false;
+let activeEmoteBtn = null; // currently highlighted emote button
 
 // ── MATH SYMBOLS ──────────────────────────────────────────────────────────────
 const MATH_SYM = {
@@ -111,6 +112,12 @@ function initSocket() {
   socket.on('emote-received', ({ emote, from }) => {
     showTeacherEmote(emote, from);
     toast(`${emote} van ${from}`);
+  });
+
+  // Teacher has acknowledged the student's emote
+  socket.on('emote-dismissed', () => {
+    clearActiveEmote();
+    toast('Docent heeft je reactie gezien');
   });
 }
 
@@ -243,10 +250,27 @@ function exitFocusMode() {
 function initEmotes() {
   document.querySelectorAll('.student-header .emote-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (activeEmoteBtn === btn) {
+        // Zelfde knop: annuleer de actieve emote
+        btn.classList.remove('emote-active');
+        activeEmoteBtn = null;
+        socket && socket.emit('emote-cancel');
+        return;
+      }
+      // Nieuwe emote: eventuele vorige wissen
+      if (activeEmoteBtn) activeEmoteBtn.classList.remove('emote-active');
+      btn.classList.add('emote-active');
+      activeEmoteBtn = btn;
       socket && socket.emit('emote', { emote: btn.dataset.emote });
-      toast(`${btn.dataset.emote} verstuurd`);
     });
   });
+}
+
+function clearActiveEmote() {
+  if (activeEmoteBtn) {
+    activeEmoteBtn.classList.remove('emote-active');
+    activeEmoteBtn = null;
+  }
 }
 
 function showTeacherEmote(emote, from) {

@@ -521,15 +521,27 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; 
 
 .tile-footer { padding: 5px 12px; min-height: 24px; display: flex; align-items: center; gap: 8px; }
 
-.emote-popup {
-  position: absolute;
-  top: -32px;
-  right: 8px;
-  font-size: 22px;
-  animation: emote-float 2.2s forwards;
-  pointer-events: none;
+.tile-emote-badge {
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 6px;
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform .12s, opacity .12s;
+  flex-shrink: 0;
 }
-@keyframes emote-float { 0%{opacity:1;transform:translateY(0)} 80%{opacity:1;transform:translateY(-40px)} 100%{opacity:0;transform:translateY(-52px)} }
+.tile-emote-badge:hover { transform: scale(1.2); opacity: .85; }
+
+.emote-btn.emote-active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  border-radius: 6px;
+  animation: emote-pulse 1.6s ease-in-out infinite;
+}
+@keyframes emote-pulse { 0%,100%{opacity:1} 50%{opacity:.65} }
 
 /* ── Whiteboard layout ── */
 .whiteboard-area { display: flex; flex: 1; overflow: hidden; }

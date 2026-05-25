@@ -319,6 +319,25 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Student cancels their own active emote
+  socket.on('emote-cancel', () => {
+    const { roomCode, role, studentId } = socket.data;
+    const room = rooms.get(roomCode);
+    if (!room || role !== 'student') return;
+    io.to(room.teacherSocketId).emit('emote-cancelled', { studentId });
+    room.coTeachers.forEach(ct => io.to(ct.socketId).emit('emote-cancelled', { studentId }));
+  });
+
+  // Teacher dismisses a student emote (sends acknowledgement to student)
+  socket.on('emote-dismiss', ({ studentId }) => {
+    const { roomCode } = socket.data;
+    const room = rooms.get(roomCode);
+    if (!room) return;
+    const st = room.students.get(studentId);
+    if (st) io.to(st.socketId).emit('emote-dismissed');
+    room.coTeachers.forEach(ct => io.to(ct.socketId).emit('emote-cancelled', { studentId }));
+  });
+
   // Tab switch detection
   socket.on('tab-hidden', () => {
     const { roomCode, role, studentId, studentName } = socket.data;
