@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whiteboard – Graaf Engelbrecht</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .room-code-input {
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 700;
+      font-size: 18px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <img src="/img/ge-logo.svg" class="auth-logo" alt="Graaf Engelbrecht">
+    <h1>Whiteboard</h1>
+    <p class="auth-sub">Graaf Engelbrecht</p>
+
+    <div class="input-group">
+      <label>Jouw naam</label>
+      <input type="text" id="studentName" placeholder="Bijv. Emma" maxlength="40" autocomplete="name">
+    </div>
+
+    <div class="input-group">
+      <label>Klascode</label>
+      <input type="text" id="roomCode" placeholder="ABCDEF" maxlength="6"
+             class="room-code-input"
+             oninput="this.value=this.value.toUpperCase()"
+             autocomplete="off">
+    </div>
+
+    <button class="btn btn-primary btn-full" id="joinBtn">Deelnemen</button>
+
+    <div class="auth-footer">
+      Docent? <a href="/docent">Klas aanmaken</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Pre-fill from URL params (persistent access link)
+  const params = new URLSearchParams(location.search);
+  if (params.get('room'))  document.getElementById('roomCode').value   = params.get('room').toUpperCase();
+  if (params.get('name'))  document.getElementById('studentName').value = decodeURIComponent(params.get('name'));
+
+  // Auto-redirect returning student with full params
+  const autoRoom = params.get('room');
+  const autoSid  = params.get('sid');
+  const autoName = params.get('name');
+  if (autoRoom && autoSid && autoName) {
+    goToStudent(autoRoom.toUpperCase(), decodeURIComponent(autoName), autoSid);
+  }
+
+  document.getElementById('joinBtn').addEventListener('click', joinRoom);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') joinRoom();
+  });
+
+  function joinRoom() {
+    const name = document.getElementById('studentName').value.trim();
+    const code = document.getElementById('roomCode').value.trim().toUpperCase();
+    if (!name) { toast('Vul je naam in', 'warn'); return; }
+    if (code.length < 4) { toast('Vul een geldige klascode in', 'warn'); return; }
+
+    const sidKey = `sid_${code}`;
+    let sid = localStorage.getItem(sidKey);
+    if (!sid) { sid = crypto.randomUUID(); localStorage.setItem(sidKey, sid); }
+
+    goToStudent(code, name, sid);
+  }
+
+  function goToStudent(room, name, sid) {
+    location.href = `/student.html?room=${room}&name=${encodeURIComponent(name)}&sid=${sid}`;
+  }
+
+  function toast(msg, type = '') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3200);
+  }
+</script>
+</body>
+</html>

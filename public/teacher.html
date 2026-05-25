@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docent – Whiteboard Graaf Engelbrecht</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="app" id="app">
+  <!-- Header -->
+  <header class="app-header">
+    <img src="/img/ge-logo.svg" class="header-logo" alt="GE">
+    <span class="logo">Whiteboard</span>
+    <span class="room-badge" id="roomBadge" title="Klik om te kopiëren">—</span>
+    <button class="btn btn-sm btn-secondary" id="copyLinkBtn">Link kopiëren</button>
+    <button class="btn btn-sm btn-secondary" id="coTeacherBtn">Co-docent</button>
+    <div class="header-spacer"></div>
+    <!-- Emotes: this IS the feature, emoji here is intentional -->
+    <div class="emote-bar">
+      <button class="emote-btn" data-emote="👍" title="Goed zo">👍</button>
+      <button class="emote-btn" data-emote="⭐" title="Uitstekend">⭐</button>
+      <button class="emote-btn" data-emote="❓" title="Vraag">❓</button>
+      <button class="emote-btn" data-emote="⏸️" title="Stop even">⏸️</button>
+    </div>
+    <button class="focus-btn" id="focusBtn">Focus</button>
+    <button class="btn btn-sm btn-secondary" id="libraryBtn">Bibliotheek</button>
+  </header>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="overview">Overzicht</button>
+    <button class="tab-btn" data-tab="whiteboard">Mijn bord</button>
+    <button class="tab-btn" id="lobbyTab" data-tab="lobby">
+      Wachtkamer
+      <span id="lobbyCount" class="hidden" style="background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;"></span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="teacher-body">
+
+    <!-- Sidebar -->
+    <div class="teacher-sidebar" id="sidebar">
+      <div class="sidebar-header">
+        Leerlingen
+        <span id="studentCountBadge" style="font-weight:400;color:var(--text-muted);">0</span>
+      </div>
+      <div class="student-list" id="studentList"></div>
+    </div>
+
+    <!-- Main area -->
+    <div class="main-panel" id="mainPanel">
+
+      <!-- Overzicht tab -->
+      <div id="tabOverview" class="tab-content">
+        <div id="studentGrid" class="student-grid">
+          <div id="emptyGrid" style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:60px 24px;">
+            Geen leerlingen verbonden.<br>
+            <strong id="emptyCode" style="font-size:22px;letter-spacing:2px;color:var(--primary);display:block;margin-top:8px;">—</strong>
+            <span style="font-size:13px;">Deel deze code met je klas.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mijn bord tab -->
+      <div id="tabWhiteboard" class="tab-content hidden" style="display:flex;height:100%;flex-direction:column;">
+        <div style="flex:1;display:flex;overflow:hidden;">
+          <!-- Toolbar -->
+          <div class="toolbar" id="teacherToolbar">
+            <!-- Draw -->
+            <button class="tool-btn active" data-tool="pen"      title="Pen">✎</button>
+            <button class="tool-btn"        data-tool="eraser"   title="Gum">⊘</button>
+            <div class="tool-sep"></div>
+            <!-- Shapes -->
+            <button class="tool-btn" data-tool="line"     title="Lijn">─</button>
+            <button class="tool-btn" data-tool="arrow"    title="Pijl">→</button>
+            <button class="tool-btn" data-tool="rect"     title="Rechthoek">▭</button>
+            <button class="tool-btn" data-tool="circle"   title="Cirkel">○</button>
+            <button class="tool-btn" data-tool="triangle" title="Driehoek">△</button>
+            <div class="tool-sep"></div>
+            <!-- Text / Math -->
+            <button class="tool-btn" data-tool="text" title="Tekst invoegen">T</button>
+            <button class="tool-btn" id="mathBtn"          title="Wiskundesymbolen">∑</button>
+            <div class="tool-sep"></div>
+            <!-- Fill toggle -->
+            <button class="tool-btn" id="filled-toggle" title="Gevuld / Omtrek">●</button>
+            <div class="tool-sep"></div>
+            <!-- Color + width -->
+            <div class="color-picker-wrap" title="Kleur kiezen">
+              <div class="color-swatch" id="colorSwatch" style="background:#2A2C24;"></div>
+              <input type="color" id="colorPicker" value="#2A2C24">
+            </div>
+            <div class="tool-sep"></div>
+            <input type="range" class="width-slider" id="widthSlider" min="1" max="20" value="3" title="Lijndikte">
+            <div class="tool-sep"></div>
+            <!-- Diagrams / Tools -->
+            <button class="tool-btn" id="chartBtn"            title="Grafiek invoegen">≡</button>
+            <button class="tool-btn" id="insertRulerBtn"      title="Liniaal invoegen">|–|</button>
+            <button class="tool-btn" id="insertProtractorBtn" title="Gradenboog invoegen">∩</button>
+            <button class="tool-btn" id="insertAngleBtn"      title="Hoek invoegen">∠</button>
+            <div class="tool-sep"></div>
+            <!-- Media -->
+            <button class="tool-btn" id="uploadImageBtn" title="Afbeelding invoegen">⊡</button>
+            <button class="tool-btn" id="uploadPdfBtn"   title="PDF als achtergrond" style="font-size:10px;font-weight:700;">PDF</button>
+            <div class="tool-sep"></div>
+            <!-- History -->
+            <button class="tool-btn" id="undoBtn"          title="Ongedaan maken">↩</button>
+            <button class="tool-btn" id="redoBtn"          title="Opnieuw">↪</button>
+            <button class="tool-btn" id="clearTeacherBtn"  title="Alles wissen">✕</button>
+            <div class="tool-sep"></div>
+            <button class="tool-btn" id="saveLibraryBtn"   title="Opslaan in bibliotheek">⊕</button>
+          </div>
+          <!-- Canvas -->
+          <div id="teacherCanvasWrap" class="canvas-wrap" style="flex:1;"></div>
+        </div>
+        <!-- PDF pages strip -->
+        <div class="pdf-pages hidden" id="pdfPagesStrip"></div>
+      </div>
+
+      <!-- Wachtkamer tab -->
+      <div id="tabLobby" class="tab-content hidden">
+        <div style="padding:20px;">
+          <h3 style="margin-bottom:16px;">Wachtkamer</h3>
+          <div id="lobbyList">
+            <p style="color:var(--text-muted);">Niemand wacht op toegang.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen student tile -->
+<div id="tileFS" class="tile-fullscreen hidden">
+  <div class="tile-fs-header">
+    <button class="btn btn-sm btn-secondary" onclick="closeTileFS()">← Terug</button>
+    <span id="tileFSName" style="font-weight:700;font-size:16px;margin-left:8px;font-family:'Playfair Display',serif;"></span>
+    <div class="header-spacer"></div>
+    <button class="btn btn-sm btn-danger"     id="tileFSClear">Wissen</button>
+    <button class="btn btn-sm btn-secondary"  id="tileFSDownload">Downloaden</button>
+  </div>
+  <div id="tileFSBody" class="tile-fs-body"></div>
+</div>
+
+<!-- Math editor modal -->
+<div class="modal-overlay hidden" id="mathModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Wiskundesymbolen invoegen</span>
+      <button class="modal-close" onclick="closeMathModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="math-category">Griekse letters</div>
+      <div class="math-grid" id="mathGridGreek"></div>
+      <div class="math-category">Wiskundige symbolen</div>
+      <div class="math-grid" id="mathGridOps"></div>
+      <div class="math-category">Superschrift &amp; subscript</div>
+      <div class="math-grid" id="mathGridSup"></div>
+      <div class="math-category">Breuken &amp; wortels</div>
+      <div class="math-grid" id="mathGridFrac"></div>
+      <input type="text" class="math-input" id="mathInput" placeholder="Formule of tekst…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeMathModal()">Annuleren</button>
+      <button class="btn btn-primary"   onclick="insertMath()">Invoegen op bord</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chart editor modal -->
+<div class="modal-overlay hidden" id="chartModal">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-header">
+      <span class="modal-title">Grafiek invoegen</span>
+      <button class="modal-close" onclick="document.getElementById('chartModal').classList.add('hidden')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="chart-types">
+        <button class="chart-type-btn active" data-chart="bar">Staafdiagram</button>
+        <button class="chart-type-btn" data-chart="line">Lijndiagram</button>
+        <button class="chart-type-btn" data-chart="pie">Taartdiagram</button>
+        <button class="chart-type-btn" data-chart="donut">Donut</button>
+      </div>
+      <div class="input-group"><label>Titel</label><input type="text" id="chartTitle" placeholder="Bijv. Resultaten meting"></div>
+      <div style="display:flex;gap:10px;">
+        <div class="input-group" style="flex:1;"><label>X-as label</label><input type="text" id="chartXLabel" placeholder="Bijv. Maanden"></div>
+        <div class="input-group" style="flex:1;"><label>Y-as label</label><input type="text" id="chartYLabel" placeholder="Bijv. Aantal"></div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Label</th><th>Waarde</th><th></th></tr></thead>
+        <tbody id="chartDataBody"></tbody>
+      </table>
+      <button class="btn btn-secondary btn-sm" onclick="addChartRow()">+ Rij toevoegen</button>
+      <div class="chart-preview"><canvas id="chartPreviewCanvas" width="540" height="300" style="width:100%;"></canvas></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('chartModal').classList.add('hidden')">Annuleren</button>
+      <button class="btn btn-primary"   onclick="insertChart()">Invoegen op bord</button>
+    </div>
+  </div>
+</div>
+
+<!-- Library modal -->
+<div class="modal-overlay hidden" id="libraryModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <span class="modal-title">Bibliotheek</span>
+      <button class="modal-close" onclick="document.getElementById('libraryModal').classList.add('hidden')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <input type="text" id="libSaveName" placeholder="Naam voor huidig bord…"
+               style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);outline:none;">
+        <button class="btn btn-primary" onclick="saveToLibrary()">Opslaan</button>
+      </div>
+      <div id="libraryGrid" class="lib-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Co-teacher modal -->
+<div class="modal-overlay hidden" id="coTeacherModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title">Co-docent uitnodigen</span>
+      <button class="modal-close" onclick="document.getElementById('coTeacherModal').classList.add('hidden')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);margin-bottom:14px;font-size:13px;">Stuur deze link of code naar de co-docent:</p>
+      <div style="background:var(--cream);border-radius:var(--radius);padding:14px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:6px;">Code</div>
+        <code id="coTeacherCodeDisplay" style="font-size:20px;letter-spacing:2px;color:var(--primary);font-family:'Space Grotesk',monospace;">—</code>
+      </div>
+      <div style="background:var(--cream);border-radius:var(--radius);padding:14px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:6px;">Link</div>
+        <input type="text" id="coTeacherLinkDisplay" readonly
+               style="width:100%;border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:12px;background:#fff;color:var(--dark);">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="copyCoTeacherLink()">Link kopiëren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Angle modal -->
+<div class="modal-overlay hidden" id="angleModal">
+  <div class="modal" style="max-width:300px;">
+    <div class="modal-header">
+      <span class="modal-title">Hoek invoegen</span>
+      <button class="modal-close" onclick="document.getElementById('angleModal').classList.add('hidden')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group">
+        <label>Hoek (graden)</label>
+        <input type="number" id="angleDeg" value="45" min="1" max="359"
+               style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);outline:none;">
+      </div>
+      <canvas id="anglePreview" width="200" height="200"
+              style="border:1px solid var(--border);border-radius:var(--radius);display:block;margin:12px auto 0;"></canvas>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('angleModal').classList.add('hidden')">Annuleren</button>
+      <button class="btn btn-primary"   onclick="insertAngle()">Invoegen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="imageFileInput" accept="image/*"        style="display:none">
+<input type="file" id="pdfFileInput"   accept="application/pdf" style="display:none">
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<script src="/js/canvas-engine.js"></script>
+<script src="/js/charts.js"></script>
+<script src="/js/teacher-app.js"></script>
+</body>
+</html>

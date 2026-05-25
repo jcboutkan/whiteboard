@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whiteboard – Graaf Engelbrecht</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- Pending screens -->
+<div id="pendingScreen" class="pending-screen hidden">
+  <div class="spinner"></div>
+  <h2>Wachten op toelating</h2>
+  <p>De docent laat je zo snel mogelijk toe.</p>
+  <p style="margin-top:10px;font-size:12px;color:var(--text-muted);" id="pendingRoomInfo"></p>
+</div>
+
+<div id="rejectedScreen" class="pending-screen hidden">
+  <div style="width:56px;height:56px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:24px;color:#fff;font-weight:700;">✕</div>
+  <h2>Toegang geweigerd</h2>
+  <p>De docent heeft je niet toegelaten.</p>
+  <a href="/" class="btn btn-primary" style="margin-top:20px;text-decoration:none;">Terug naar startpagina</a>
+</div>
+
+<div id="teacherGoneScreen" class="pending-screen hidden">
+  <div class="spinner"></div>
+  <h2>Docent is niet verbonden</h2>
+  <p>Even geduld — de docent keert zo terug.</p>
+</div>
+
+<!-- Main student app -->
+<div id="studentApp" class="student-app hidden">
+
+  <!-- Focus banner -->
+  <div class="focus-banner hidden" id="focusBanner">Focus modus — volg het bord van de docent</div>
+
+  <!-- Header -->
+  <header class="student-header">
+    <img src="/img/ge-logo.svg" class="header-logo" alt="GE">
+    <span class="logo" style="font-size:14px;">Whiteboard</span>
+    <span class="student-name-badge" id="studentNameBadge">—</span>
+    <span style="color:var(--text-muted);font-size:12px;">kamer <strong id="studentRoomCode">—</strong></span>
+    <div class="header-spacer"></div>
+    <!-- Emotes: intentional use of emoji (it is the emote feature) -->
+    <div class="emote-bar">
+      <button class="emote-btn" data-emote="✋" title="Hand opsteken">✋</button>
+      <button class="emote-btn" data-emote="👍" title="Begrijp het">👍</button>
+      <button class="emote-btn" data-emote="😕" title="Snap het niet">😕</button>
+      <button class="emote-btn" data-emote="🎉" title="Klaar">🎉</button>
+      <button class="emote-btn" data-emote="⏸️" title="Wacht even">⏸️</button>
+    </div>
+    <button class="btn btn-sm btn-secondary" id="getLinkBtn">Mijn link</button>
+  </header>
+
+  <!-- Body: toolbar + canvas -->
+  <div class="student-body">
+    <div class="toolbar" id="studentToolbar">
+      <button class="tool-btn active" data-tool="pen"      title="Pen">✎</button>
+      <button class="tool-btn"        data-tool="eraser"   title="Gum">⊘</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" data-tool="line"     title="Lijn">─</button>
+      <button class="tool-btn" data-tool="arrow"    title="Pijl">→</button>
+      <button class="tool-btn" data-tool="rect"     title="Rechthoek">▭</button>
+      <button class="tool-btn" data-tool="circle"   title="Cirkel">○</button>
+      <button class="tool-btn" data-tool="triangle" title="Driehoek">△</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" data-tool="text"       title="Tekst invoegen">T</button>
+      <button class="tool-btn" id="studentMathBtn"    title="Wiskundesymbolen">∑</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" id="studentFilledToggle" title="Gevuld / Omtrek">●</button>
+      <div class="tool-sep"></div>
+      <div class="color-picker-wrap" title="Kleur kiezen">
+        <div class="color-swatch" id="studentColorSwatch" style="background:#2A2C24;"></div>
+        <input type="color" id="studentColorPicker" value="#2A2C24">
+      </div>
+      <div class="tool-sep"></div>
+      <input type="range" class="width-slider" id="studentWidthSlider" min="1" max="20" value="3" title="Lijndikte">
+      <div class="tool-sep"></div>
+      <button class="tool-btn" id="studentUndoBtn"  title="Ongedaan maken">↩</button>
+      <button class="tool-btn" id="studentRedoBtn"  title="Opnieuw">↪</button>
+      <button class="tool-btn" id="studentClearBtn" title="Alles wissen">✕</button>
+    </div>
+    <div id="studentCanvasWrap" class="canvas-wrap" style="flex:1;"></div>
+  </div>
+</div>
+
+<!-- Focus overlay border -->
+<div class="focus-overlay hidden" id="focusOverlay"></div>
+
+<!-- Math modal -->
+<div class="modal-overlay hidden" id="studentMathModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Wiskundesymbolen invoegen</span>
+      <button class="modal-close" onclick="document.getElementById('studentMathModal').classList.add('hidden')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="math-category">Griekse letters</div>
+      <div class="math-grid" id="sMathGridGreek"></div>
+      <div class="math-category">Wiskundige symbolen</div>
+      <div class="math-grid" id="sMathGridOps"></div>
+      <div class="math-category">Superschrift &amp; subscript</div>
+      <div class="math-grid" id="sMathGridSup"></div>
+      <div class="math-category">Breuken &amp; wortels</div>
+      <div class="math-grid" id="sMathGridFrac"></div>
+      <input type="text" class="math-input" id="sMathInput" placeholder="Formule of tekst…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('studentMathModal').classList.add('hidden')">Annuleren</button>
+      <button class="btn btn-primary"   onclick="insertStudentMath()">Invoegen op bord</button>
+    </div>
+  </div>
+</div>
+
+<!-- Access link modal -->
+<div class="modal-overlay hidden" id="linkModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title">Mijn toegangslink</span>
+      <button class="modal-close" onclick="document.getElementById('linkModal').classList.add('hidden')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:10px;color:var(--text-muted);font-size:13px;">Gebruik deze link om later direct terug te keren naar jouw whiteboard:</p>
+      <input type="text" id="myAccessLink" readonly
+             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--cream);color:var(--dark);">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="copyMyLink()">Kopiëren</button>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/canvas-engine.js"></script>
+<script src="/js/student-app.js"></script>
+</body>
+</html>

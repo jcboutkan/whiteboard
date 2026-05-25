@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docent – Whiteboard Graaf Engelbrecht</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <img src="/img/ge-logo.svg" class="auth-logo" alt="Graaf Engelbrecht">
+    <h1>Whiteboard</h1>
+    <p class="auth-sub">Graaf Engelbrecht — Docent</p>
+
+    <div id="pinSection" class="hidden">
+      <div class="input-group">
+        <label>Toegangscode</label>
+        <input type="password" id="teacherPin" placeholder="Voer de code in" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Jouw naam</label>
+      <input type="text" id="teacherName" placeholder="Bijv. Jansen" maxlength="40" autocomplete="name">
+    </div>
+
+    <button class="btn btn-primary btn-full" id="createBtn">Klas aanmaken</button>
+
+    <hr class="auth-divider">
+
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Co-docent deelnemen</p>
+
+    <div class="input-group">
+      <label>Co-docent code</label>
+      <input type="text" id="coTeacherCode" placeholder="CT-ABCDEF" maxlength="9"
+             style="text-transform:uppercase;letter-spacing:1px;font-weight:700;"
+             oninput="this.value=this.value.toUpperCase()">
+    </div>
+
+    <button class="btn btn-secondary btn-full" id="coTeacherBtn">Deelnemen als co-docent</button>
+
+    <div class="auth-footer">
+      Leerling? <a href="/">Naar de leerlingenpagina</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Check if PIN protection is enabled
+  fetch('/api/teacher-config')
+    .then(r => r.json())
+    .then(cfg => {
+      if (cfg.hasPin) {
+        document.getElementById('pinSection').classList.remove('hidden');
+      }
+    })
+    .catch(() => {});
+
+  document.getElementById('createBtn').addEventListener('click', createRoom);
+  document.getElementById('coTeacherBtn').addEventListener('click', joinAsCoTeacher);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') createRoom();
+  });
+
+  async function createRoom() {
+    const name = document.getElementById('teacherName').value.trim();
+    if (!name) { toast('Vul je naam in', 'warn'); return; }
+
+    // Verify PIN if required
+    const pinSection = document.getElementById('pinSection');
+    if (!pinSection.classList.contains('hidden')) {
+      const pin = document.getElementById('teacherPin').value;
+      if (!pin) { toast('Voer de toegangscode in', 'warn'); return; }
+      try {
+        const res = await fetch('/api/verify-teacher', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin })
+        });
+        const { ok } = await res.json();
+        if (!ok) { toast('Onjuiste toegangscode', 'error'); return; }
+      } catch {
+        toast('Verbindingsfout', 'error');
+        return;
+      }
+    }
+
+    let tid = localStorage.getItem('teacherId');
+    if (!tid) { tid = crypto.randomUUID(); localStorage.setItem('teacherId', tid); }
+    localStorage.setItem('teacherName', name);
+
+    location.href = `/teacher.html?name=${encodeURIComponent(name)}&tid=${tid}`;
+  }
+
+  function joinAsCoTeacher() {
+    const code = document.getElementById('coTeacherCode').value.trim().toUpperCase();
+    const name = document.getElementById('teacherName').value.trim();
+    if (!name) { toast('Vul je naam in', 'warn'); return; }
+    if (!code.startsWith('CT-') || code.length < 9) { toast('Ongeldige co-docent code', 'warn'); return; }
+    const roomCode = code.replace('CT-', '');
+    location.href = `/teacher.html?coteacher=1&ctcode=${encodeURIComponent(code)}&room=${roomCode}&name=${encodeURIComponent(name)}`;
+  }
+
+  function toast(msg, type = '') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3200);
+  }
+</script>
+</body>
+</html>

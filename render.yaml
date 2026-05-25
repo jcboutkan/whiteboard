@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: whiteboard-ge
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: false
+      # Optioneel: stel een toegangscode in voor de docentenpagina (/docent)
+      # Leerlingen kunnen dan niet zelf klassen aanmaken.
+      # Verwijder of laat leeg om de PIN-beveiliging uit te schakelen.
+      - key: TEACHER_PIN
+        value: ""
+    disk:
+      name: uploads
+      mountPath: /uploads
+      sizeGB: 1

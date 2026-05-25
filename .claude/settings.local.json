@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\Program Files \\(x86\\)\\\\nodejs\\\\npm.cmd\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:APPDATA\\\\npm\\\\npm.cmd\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object -First 5)",
+      "PowerShell(cd \"C:\\\\Users\\\\10433\\\\OneDrive - Libreon\\\\lesmateriaal\\\\whiteboard\"; $env:PORT=\"3456\"; Start-Process -FilePath \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -ArgumentList \"server.js\" -WorkingDirectory \\(Get-Location\\).Path -PassThru | Select-Object Id)",
+      "PowerShell(Start-Sleep -Seconds 2; try { Invoke-WebRequest -Uri \"http://localhost:3456\" -UseBasicParsing -TimeoutSec 3 | Select-Object StatusCode } catch { $_.Exception.Message })",
+      "Bash(mkdir -p \"C:\\\\Users\\\\10433\\\\OneDrive - Libreon\\\\lesmateriaal\\\\whiteboard\\\\.claude\")",
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(Get-Process -Name node -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)"
+    ]
+  }
+}
