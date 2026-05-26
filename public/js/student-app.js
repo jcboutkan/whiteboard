@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     location.href = '/';
     return;
   }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
   document.getElementById('studentNameBadge').textContent = studentName;
   document.getElementById('studentRoomCode').textContent  = roomCode;
   document.title = `${studentName} – Whiteboard Klas`;

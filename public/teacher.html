@@ -70,78 +70,63 @@
 
       <!-- Mijn bord tab -->
       <div id="tabWhiteboard" class="tab-content hidden" style="display:flex;height:100%;flex-direction:column;">
-        <div style="flex:1;display:flex;overflow:hidden;">
-          <!-- Toolbar -->
-          <div class="toolbar" id="teacherToolbar">
-            <!-- Select / move -->
-            <button class="tool-btn" data-tool="select" title="Selecteren &amp; verplaatsen">↖</button>
-            <div class="tool-sep"></div>
-            <!-- Draw -->
-            <button class="tool-btn active" data-tool="pen"      title="Pen">✎</button>
-            <button class="tool-btn"        data-tool="eraser"   title="Gum">⊘</button>
-            <div class="tool-sep"></div>
-            <!-- Shapes -->
-            <button class="tool-btn" data-tool="line"     title="Lijn">─</button>
-            <button class="tool-btn" data-tool="arrow"    title="Pijl">→</button>
-            <button class="tool-btn" data-tool="rect"     title="Rechthoek">▭</button>
-            <button class="tool-btn" data-tool="circle"   title="Cirkel">○</button>
-            <button class="tool-btn" data-tool="triangle" title="Driehoek">△</button>
-            <div class="tool-sep"></div>
-            <!-- Text / Math -->
-            <button class="tool-btn" data-tool="text" title="Tekst invoegen">T</button>
-            <button class="tool-btn" id="mathBtn"          title="Wiskundesymbolen">∑</button>
-            <div class="tool-sep"></div>
-            <!-- Fill toggle -->
-            <button class="tool-btn" id="filled-toggle" title="Gevuld / Omtrek">●</button>
-            <div class="tool-sep"></div>
-            <!-- Color + width -->
-            <div class="color-picker-wrap" title="Kleur kiezen">
-              <div class="color-swatch" id="colorSwatch" style="background:#2A2C24;"></div>
-              <input type="color" id="colorPicker" value="#2A2C24">
-            </div>
-            <div class="tool-sep"></div>
-            <input type="range" class="width-slider" id="widthSlider" min="1" max="20" value="3" title="Lijndikte">
-            <div class="tool-sep"></div>
-            <!-- Diagrams / Tools -->
-            <button class="tool-btn" id="chartBtn"            title="Grafiek invoegen">≡</button>
-            <button class="tool-btn" id="insertRulerBtn"      title="Liniaal invoegen">|–|</button>
-            <button class="tool-btn" id="insertProtractorBtn" title="Gradenboog invoegen">∩</button>
-            <button class="tool-btn" id="insertAngleBtn"      title="Hoek invoegen">∠</button>
-            <div class="tool-sep"></div>
-            <!-- Media -->
-            <button class="tool-btn" id="uploadImageBtn" title="Afbeelding invoegen">⊡</button>
-            <button class="tool-btn" id="uploadPdfBtn"   title="PDF als achtergrond" style="font-size:10px;font-weight:700;">PDF</button>
-            <div class="tool-sep"></div>
-            <!-- History -->
-            <button class="tool-btn" id="undoBtn"          title="Ongedaan maken">↩</button>
-            <button class="tool-btn" id="redoBtn"          title="Opnieuw">↪</button>
-            <button class="tool-btn" id="clearTeacherBtn"  title="Alles wissen">✕</button>
-            <div class="tool-sep"></div>
-            <button class="tool-btn" id="saveLibraryBtn"   title="Opslaan in bibliotheek">⊕</button>
-            <div class="tool-sep"></div>
-            <!-- Locked layer -->
-            <button class="tool-btn tool-lock" id="pushLockedBtn"  title="Stuur vergrendeld naar leerlingen">⊞</button>
-            <button class="tool-btn tool-lock" id="clearLockedBtn" title="Vergrendeling opheffen bij leerlingen">⊟</button>
+        <!-- Horizontale toolbar -->
+        <div class="toolbar" id="teacherToolbar">
+          <button class="tool-btn" data-tool="select" title="Selecteren &amp; verplaatsen"><i data-lucide="mouse-pointer-2"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn active" data-tool="pen"      title="Pen"><i data-lucide="pencil"></i></button>
+          <button class="tool-btn"        data-tool="eraser"   title="Gum"><i data-lucide="eraser"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" data-tool="line"     title="Lijn"><i data-lucide="minus"></i></button>
+          <button class="tool-btn" data-tool="arrow"    title="Pijl"><i data-lucide="arrow-right"></i></button>
+          <button class="tool-btn" data-tool="rect"     title="Rechthoek"><i data-lucide="square"></i></button>
+          <button class="tool-btn" data-tool="circle"   title="Cirkel"><i data-lucide="circle"></i></button>
+          <button class="tool-btn" data-tool="triangle" title="Driehoek"><i data-lucide="triangle"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" data-tool="text" title="Tekst invoegen"><i data-lucide="type"></i></button>
+          <button class="tool-btn" id="mathBtn"          title="Wiskundesymbolen"><i data-lucide="sigma"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" id="filled-toggle"   title="Gevuld / Omtrek"><i data-lucide="disc"></i></button>
+          <div class="tool-sep"></div>
+          <div class="color-picker-wrap" title="Kleur kiezen">
+            <div class="color-swatch" id="colorSwatch" style="background:#2A2C24;"></div>
+            <input type="color" id="colorPicker" value="#2A2C24">
           </div>
-          <!-- Canvas area: context bar + canvas -->
-          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-            <!-- Selection context bar (shown when object selected) -->
-            <div id="selectContextBar" class="sel-ctx-bar hidden">
-              <span class="sel-ctx-label">Volgorde:</span>
-              <button class="sel-ctx-btn" id="ctxToFront" title="Naar voorgrond">⬆</button>
-              <button class="sel-ctx-btn" id="ctxFwd"     title="Stap naar voren">↑</button>
-              <button class="sel-ctx-btn" id="ctxBack"    title="Stap naar achter">↓</button>
-              <button class="sel-ctx-btn" id="ctxToBack"  title="Naar achtergrond">⬇</button>
-              <div class="sel-ctx-sep"></div>
-              <button class="sel-ctx-btn" id="ctxLock"    title="Vergrendelen voor leerlingen">Vergrendelen</button>
-              <button class="sel-ctx-btn sel-ctx-unlock hidden" id="ctxUnlock" title="Ontgrendelen">Ontgrendelen</button>
-              <div class="sel-ctx-sep"></div>
-              <button class="sel-ctx-btn sel-ctx-del" id="ctxDelete" title="Verwijderen (Del)">✕ Wissen</button>
-            </div>
-            <div id="teacherCanvasWrap" class="canvas-wrap" style="flex:1;"></div>
-          </div>
+          <input type="range" class="width-slider" id="widthSlider" min="1" max="20" value="3" title="Lijndikte">
+          <div class="tool-sep"></div>
+          <button class="tool-btn" id="chartBtn"            title="Grafiek invoegen"><i data-lucide="bar-chart-2"></i></button>
+          <button class="tool-btn" id="insertRulerBtn"      title="Liniaal invoegen"><i data-lucide="ruler"></i></button>
+          <button class="tool-btn" id="insertProtractorBtn" title="Gradenboog invoegen"><i data-lucide="compass"></i></button>
+          <button class="tool-btn" id="insertAngleBtn"      title="Hoek invoegen"><i data-lucide="corner-down-right"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" id="uploadImageBtn" title="Afbeelding invoegen"><i data-lucide="image"></i></button>
+          <button class="tool-btn" id="uploadPdfBtn"   title="PDF als achtergrond"><i data-lucide="file-text"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" id="undoBtn"         title="Ongedaan maken"><i data-lucide="undo-2"></i></button>
+          <button class="tool-btn" id="redoBtn"         title="Opnieuw"><i data-lucide="redo-2"></i></button>
+          <button class="tool-btn" id="clearTeacherBtn" title="Alles wissen"><i data-lucide="trash-2"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" id="saveLibraryBtn"  title="Opslaan in bibliotheek"><i data-lucide="bookmark-plus"></i></button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" id="pushLockedBtn"   title="Vergrendel voor leerlingen"><i data-lucide="lock"></i></button>
+          <button class="tool-btn" id="clearLockedBtn"  title="Vergrendeling opheffen"><i data-lucide="lock-open"></i></button>
         </div>
-        <!-- PDF pages strip -->
+        <!-- Selectie context-balk -->
+        <div id="selectContextBar" class="sel-ctx-bar hidden">
+          <span class="sel-ctx-label">Volgorde:</span>
+          <button class="sel-ctx-btn" id="ctxToFront" title="Naar voorgrond"><i data-lucide="chevrons-up"></i></button>
+          <button class="sel-ctx-btn" id="ctxFwd"     title="Stap naar voren"><i data-lucide="chevron-up"></i></button>
+          <button class="sel-ctx-btn" id="ctxBack"    title="Stap naar achter"><i data-lucide="chevron-down"></i></button>
+          <button class="sel-ctx-btn" id="ctxToBack"  title="Naar achtergrond"><i data-lucide="chevrons-down"></i></button>
+          <div class="sel-ctx-sep"></div>
+          <button class="sel-ctx-btn" id="ctxLock"   title="Vergrendelen voor leerlingen"><i data-lucide="lock"></i> Vergrendelen</button>
+          <button class="sel-ctx-btn sel-ctx-unlock hidden" id="ctxUnlock" title="Ontgrendelen"><i data-lucide="lock-open"></i> Ontgrendelen</button>
+          <div class="sel-ctx-sep"></div>
+          <button class="sel-ctx-btn sel-ctx-del" id="ctxDelete" title="Verwijderen (Del)"><i data-lucide="trash-2"></i> Wissen</button>
+        </div>
+        <!-- Canvas -->
+        <div id="teacherCanvasWrap" class="canvas-wrap" style="flex:1;"></div>
+        <!-- PDF bladwijzer strip -->
         <div class="pdf-pages hidden" id="pdfPagesStrip"></div>
       </div>
 
@@ -300,6 +285,7 @@
 <input type="file" id="pdfFileInput"   accept="application/pdf" style="display:none">
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="/js/canvas-engine.js"></script>

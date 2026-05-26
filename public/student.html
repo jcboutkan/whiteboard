@@ -59,30 +59,29 @@
   <!-- Body: toolbar + canvas -->
   <div class="student-body">
     <div class="toolbar" id="studentToolbar">
-      <button class="tool-btn active" data-tool="pen"      title="Pen">✎</button>
-      <button class="tool-btn"        data-tool="eraser"   title="Gum">⊘</button>
+      <button class="tool-btn active" data-tool="pen"      title="Pen"><i data-lucide="pencil"></i></button>
+      <button class="tool-btn"        data-tool="eraser"   title="Gum"><i data-lucide="eraser"></i></button>
       <div class="tool-sep"></div>
-      <button class="tool-btn" data-tool="line"     title="Lijn">─</button>
-      <button class="tool-btn" data-tool="arrow"    title="Pijl">→</button>
-      <button class="tool-btn" data-tool="rect"     title="Rechthoek">▭</button>
-      <button class="tool-btn" data-tool="circle"   title="Cirkel">○</button>
-      <button class="tool-btn" data-tool="triangle" title="Driehoek">△</button>
+      <button class="tool-btn" data-tool="line"     title="Lijn"><i data-lucide="minus"></i></button>
+      <button class="tool-btn" data-tool="arrow"    title="Pijl"><i data-lucide="arrow-right"></i></button>
+      <button class="tool-btn" data-tool="rect"     title="Rechthoek"><i data-lucide="square"></i></button>
+      <button class="tool-btn" data-tool="circle"   title="Cirkel"><i data-lucide="circle"></i></button>
+      <button class="tool-btn" data-tool="triangle" title="Driehoek"><i data-lucide="triangle"></i></button>
       <div class="tool-sep"></div>
-      <button class="tool-btn" data-tool="text"       title="Tekst invoegen">T</button>
-      <button class="tool-btn" id="studentMathBtn"    title="Wiskundesymbolen">∑</button>
+      <button class="tool-btn" data-tool="text"       title="Tekst invoegen"><i data-lucide="type"></i></button>
+      <button class="tool-btn" id="studentMathBtn"    title="Wiskundesymbolen"><i data-lucide="sigma"></i></button>
       <div class="tool-sep"></div>
-      <button class="tool-btn" id="studentFilledToggle" title="Gevuld / Omtrek">●</button>
+      <button class="tool-btn" id="studentFilledToggle" title="Gevuld / Omtrek"><i data-lucide="disc"></i></button>
       <div class="tool-sep"></div>
       <div class="color-picker-wrap" title="Kleur kiezen">
         <div class="color-swatch" id="studentColorSwatch" style="background:#2A2C24;"></div>
         <input type="color" id="studentColorPicker" value="#2A2C24">
       </div>
-      <div class="tool-sep"></div>
       <input type="range" class="width-slider" id="studentWidthSlider" min="1" max="20" value="3" title="Lijndikte">
       <div class="tool-sep"></div>
-      <button class="tool-btn" id="studentUndoBtn"  title="Ongedaan maken">↩</button>
-      <button class="tool-btn" id="studentRedoBtn"  title="Opnieuw">↪</button>
-      <button class="tool-btn" id="studentClearBtn" title="Alles wissen">✕</button>
+      <button class="tool-btn" id="studentUndoBtn"  title="Ongedaan maken"><i data-lucide="undo-2"></i></button>
+      <button class="tool-btn" id="studentRedoBtn"  title="Opnieuw"><i data-lucide="redo-2"></i></button>
+      <button class="tool-btn" id="studentClearBtn" title="Alles wissen"><i data-lucide="trash-2"></i></button>
     </div>
     <div id="studentCanvasWrap" class="canvas-wrap" style="flex:1;"></div>
   </div>
@@ -135,6 +134,7 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="/js/canvas-engine.js"></script>
 <script src="/js/student-app.js"></script>
 </body>

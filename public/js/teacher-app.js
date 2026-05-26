@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
   localStorage.setItem('teacherId', teacherId);
   if (!isCoTeacher && params.get('name')) localStorage.setItem('teacherName', teacherName);
 
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
   initSocket();
   initTeacherCanvas();
   initToolbar();
