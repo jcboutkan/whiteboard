@@ -233,6 +233,49 @@ function joinAsCoTeacher() {
   socket.emit('join-as-co-teacher', { roomCode: room, ctCode: code, name: teacherName });
 }
 
+function newRoom() {
+  if (!confirm('Nieuwe klas starten? De huidige klas wordt gesloten en alle leerlingen verbroken.')) return;
+
+  // Clear old state
+  localStorage.removeItem('lastRoom');
+  roomCode = null;
+  myCoTeacherCode = null;
+
+  // Reset student list
+  students.forEach(st => {
+    if (st.engine) st.engine.destroy();
+  });
+  students.clear();
+  document.getElementById('studentGrid').innerHTML = `
+    <div id="emptyGrid" style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:60px 24px;">
+      Geen leerlingen verbonden.<br>
+      <strong id="emptyCode" style="font-size:22px;letter-spacing:2px;color:var(--primary);display:block;margin-top:8px;">—</strong>
+      <span style="font-size:13px;">Deel deze code met je klas.</span>
+    </div>`;
+  document.getElementById('studentList').innerHTML = '';
+  updateStudentCount();
+
+  // Reset teacher board
+  if (teacherEngine) {
+    teacherEngine.clear(false);
+    teacherEngine.clearBackground();
+    teacherEngine.clearLockedStrokes();
+  }
+  focusMode = false;
+  updateFocusBtn(false);
+
+  // Reset lobby
+  pendingMap.clear();
+  renderLobby();
+  document.getElementById('lobbyCount').classList.add('hidden');
+
+  // Reset header
+  document.getElementById('roomBadge').textContent = '—';
+
+  // Request new room from server
+  socket.emit('create-room', { teacherName, teacherId });
+}
+
 function updateRoomUI(code) {
   document.getElementById('roomBadge').textContent = code;
   document.getElementById('emptyCode').textContent = code;
@@ -407,6 +450,9 @@ function initToolbar() {
   document.getElementById('coTeacherBtn').addEventListener('click', () => {
     document.getElementById('coTeacherModal').classList.remove('hidden');
   });
+
+  // New room
+  document.getElementById('newRoomBtn').addEventListener('click', newRoom);
 
   // Library
   document.getElementById('libraryBtn').addEventListener('click', () => {
