@@ -57,17 +57,33 @@ function initSocket() {
 
   socket.on('waiting-for-approval', () => showScreen('pending'));
 
-  socket.on('join-approved', ({ studentId: sid, name, strokes, background, focusMode, teacherStrokes, teacherBackground }) => {
+  socket.on('join-approved', ({ studentId: sid, name, strokes, background, lockedLayer, focusMode, teacherStrokes, teacherBackground }) => {
     approved = true;
     showScreen('app');
     initCanvas();
 
     if (strokes?.length) engine.setStrokes(strokes);
     if (background) engine.setBackground(background);
+    if (lockedLayer?.length) engine.setLockedStrokes(lockedLayer);
 
     if (focusMode) {
       enterFocusMode(teacherStrokes || [], teacherBackground);
     }
+  });
+
+  // Locked layer from teacher
+  socket.on('locked-layer-set', ({ strokes }) => {
+    if (engine) engine.setLockedStrokes(strokes || []);
+    toast('Docent heeft inhoud vastgezet op jouw bord');
+  });
+
+  socket.on('locked-layer-cleared', () => {
+    if (engine) engine.clearLockedStrokes();
+  });
+
+  // Teacher strokes updated (reorder/move in focus mode)
+  socket.on('teacher-strokes-updated', ({ strokes }) => {
+    if (focusEngine) focusEngine.setStrokes(strokes || []);
   });
 
   socket.on('join-rejected', () => showScreen('rejected'));

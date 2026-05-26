@@ -72,6 +72,9 @@
         <div style="flex:1;display:flex;overflow:hidden;">
           <!-- Toolbar -->
           <div class="toolbar" id="teacherToolbar">
+            <!-- Select / move -->
+            <button class="tool-btn" data-tool="select" title="Selecteren &amp; verplaatsen">↖</button>
+            <div class="tool-sep"></div>
             <!-- Draw -->
             <button class="tool-btn active" data-tool="pen"      title="Pen">✎</button>
             <button class="tool-btn"        data-tool="eraser"   title="Gum">⊘</button>
@@ -114,9 +117,28 @@
             <button class="tool-btn" id="clearTeacherBtn"  title="Alles wissen">✕</button>
             <div class="tool-sep"></div>
             <button class="tool-btn" id="saveLibraryBtn"   title="Opslaan in bibliotheek">⊕</button>
+            <div class="tool-sep"></div>
+            <!-- Locked layer -->
+            <button class="tool-btn tool-lock" id="pushLockedBtn"  title="Stuur vergrendeld naar leerlingen">⊞</button>
+            <button class="tool-btn tool-lock" id="clearLockedBtn" title="Vergrendeling opheffen bij leerlingen">⊟</button>
           </div>
-          <!-- Canvas -->
-          <div id="teacherCanvasWrap" class="canvas-wrap" style="flex:1;"></div>
+          <!-- Canvas area: context bar + canvas -->
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+            <!-- Selection context bar (shown when object selected) -->
+            <div id="selectContextBar" class="sel-ctx-bar hidden">
+              <span class="sel-ctx-label">Volgorde:</span>
+              <button class="sel-ctx-btn" id="ctxToFront" title="Naar voorgrond">⬆</button>
+              <button class="sel-ctx-btn" id="ctxFwd"     title="Stap naar voren">↑</button>
+              <button class="sel-ctx-btn" id="ctxBack"    title="Stap naar achter">↓</button>
+              <button class="sel-ctx-btn" id="ctxToBack"  title="Naar achtergrond">⬇</button>
+              <div class="sel-ctx-sep"></div>
+              <button class="sel-ctx-btn" id="ctxLock"    title="Vergrendelen voor leerlingen">Vergrendelen</button>
+              <button class="sel-ctx-btn sel-ctx-unlock hidden" id="ctxUnlock" title="Ontgrendelen">Ontgrendelen</button>
+              <div class="sel-ctx-sep"></div>
+              <button class="sel-ctx-btn sel-ctx-del" id="ctxDelete" title="Verwijderen (Del)">✕ Wissen</button>
+            </div>
+            <div id="teacherCanvasWrap" class="canvas-wrap" style="flex:1;"></div>
+          </div>
         </div>
         <!-- PDF pages strip -->
         <div class="pdf-pages hidden" id="pdfPagesStrip"></div>

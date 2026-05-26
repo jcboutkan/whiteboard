@@ -543,6 +543,45 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; 
 }
 @keyframes emote-pulse { 0%,100%{opacity:1} 50%{opacity:.65} }
 
+/* ── Select context bar ── */
+.sel-ctx-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.sel-ctx-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+.sel-ctx-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--dark);
+  cursor: pointer;
+  transition: background .1s, border-color .1s;
+  white-space: nowrap;
+}
+.sel-ctx-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+.sel-ctx-del { border-color: #e5a0a0; color: #c0392b; }
+.sel-ctx-del:hover { background: #fdf0f0; border-color: #c0392b; }
+.sel-ctx-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+
+/* Lock layer toolbar buttons */
+.tool-lock { font-size: 14px; font-weight: 700; color: var(--primary); }
+
 /* ── Whiteboard layout ── */
 .whiteboard-area { display: flex; flex: 1; overflow: hidden; }
 

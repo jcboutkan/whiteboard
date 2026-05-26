@@ -69,11 +69,12 @@ function initSocket() {
     toast(`Klas aangemaakt: ${code}`, 'success');
   });
 
-  socket.on('room-rejoined', ({ code, teacherStrokes, teacherBackground, focusMode: fm, students: stList }) => {
+  socket.on('room-rejoined', ({ code, teacherStrokes, teacherBackground, lockedLayer, focusMode: fm, students: stList }) => {
     roomCode = code;
     updateRoomUI(code);
     teacherEngine.setStrokes(teacherStrokes || []);
     if (teacherBackground) teacherEngine.setBackground(teacherBackground);
+    updateLockedLayerUI(lockedLayer || []);
     focusMode = fm;
     updateFocusBtn(fm);
     stList.forEach(s => {
@@ -96,11 +97,12 @@ function initSocket() {
     socket.emit('create-room', { teacherName, teacherId });
   });
 
-  socket.on('co-teacher-approved', ({ code, teacherStrokes, teacherBackground, focusMode: fm, students: stList }) => {
+  socket.on('co-teacher-approved', ({ code, teacherStrokes, teacherBackground, lockedLayer, focusMode: fm, students: stList }) => {
     roomCode = code;
     updateRoomUI(code);
     teacherEngine.setStrokes(teacherStrokes || []);
     if (teacherBackground) teacherEngine.setBackground(teacherBackground);
+    updateLockedLayerUI(lockedLayer || []);
     focusMode = fm;
     updateFocusBtn(fm);
     stList.forEach(s => {
@@ -255,11 +257,41 @@ function initTeacherCanvas() {
     }
   });
 
-  // When math is requested, open modal at canvas center
   teacherEngine.on('open-math', ({ x, y }) => {
     mathPendingPos = { x, y };
     document.getElementById('mathModal').classList.remove('hidden');
     document.getElementById('mathInput').focus();
+  });
+
+  // Sync reordering / moves to server
+  teacherEngine.on('strokes-changed', (strokes) => {
+    socket && socket.emit('update-teacher-strokes', { strokes });
+  });
+
+  // Show/hide context bar on selection change
+  teacherEngine.on('selection-changed', (stroke) => {
+    const bar = document.getElementById('selectContextBar');
+    if (!stroke) {
+      bar.classList.add('hidden');
+      return;
+    }
+    bar.classList.remove('hidden');
+    const isLocked = !!stroke.locked;
+    document.getElementById('ctxLock').classList.toggle('hidden', isLocked);
+    document.getElementById('ctxUnlock').classList.toggle('hidden', !isLocked);
+  });
+
+  // Delete key removes selected object
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Delete' || e.key === 'Backspace') && teacherEngine.tool === 'select') {
+      if (document.activeElement && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        const removed = teacherEngine.deleteSelected();
+        if (removed) socket && socket.emit('update-teacher-strokes', { strokes: teacherEngine.getStrokes() });
+      }
+    }
+    if (e.key === 'Escape' && teacherEngine.tool === 'select') {
+      teacherEngine.deselect();
+    }
   });
 }
 
@@ -392,6 +424,49 @@ function initToolbar() {
 
   // Angle preview
   document.getElementById('angleDeg').addEventListener('input', updateAnglePreview);
+
+  // Context bar: z-order
+  document.getElementById('ctxToFront').addEventListener('click', () => {
+    teacherEngine.bringToFront();
+    socket && socket.emit('update-teacher-strokes', { strokes: teacherEngine.getStrokes() });
+  });
+  document.getElementById('ctxFwd').addEventListener('click', () => {
+    teacherEngine.bringForward();
+    socket && socket.emit('update-teacher-strokes', { strokes: teacherEngine.getStrokes() });
+  });
+  document.getElementById('ctxBack').addEventListener('click', () => {
+    teacherEngine.sendBackward();
+    socket && socket.emit('update-teacher-strokes', { strokes: teacherEngine.getStrokes() });
+  });
+  document.getElementById('ctxToBack').addEventListener('click', () => {
+    teacherEngine.sendToBack();
+    socket && socket.emit('update-teacher-strokes', { strokes: teacherEngine.getStrokes() });
+  });
+
+  // Context bar: lock / unlock / delete
+  document.getElementById('ctxLock').addEventListener('click', () => {
+    teacherEngine.lockSelected();
+    pushLockedLayer();
+    const s = teacherEngine.getSelectedStroke();
+    if (s) {
+      document.getElementById('ctxLock').classList.add('hidden');
+      document.getElementById('ctxUnlock').classList.remove('hidden');
+    }
+  });
+  document.getElementById('ctxUnlock').addEventListener('click', () => {
+    teacherEngine.unlockSelected();
+    pushLockedLayer();
+    document.getElementById('ctxLock').classList.remove('hidden');
+    document.getElementById('ctxUnlock').classList.add('hidden');
+  });
+  document.getElementById('ctxDelete').addEventListener('click', () => {
+    const removed = teacherEngine.deleteSelected();
+    if (removed) socket && socket.emit('update-teacher-strokes', { strokes: teacherEngine.getStrokes() });
+  });
+
+  // Toolbar: locked layer
+  document.getElementById('pushLockedBtn').addEventListener('click', pushLockedLayer);
+  document.getElementById('clearLockedBtn').addEventListener('click', clearLockedLayer);
 }
 
 function copyRoomCode() {
@@ -529,6 +604,33 @@ function updateStudentTileAlert(studentId, show) {
 
 function updateStudentCount() {
   document.getElementById('studentCountBadge').textContent = students.size;
+}
+
+// ── LOCKED LAYER ──────────────────────────────────────────────────────────────
+let _lockedLayerCount = 0;
+
+function updateLockedLayerUI(strokes) {
+  _lockedLayerCount = strokes.filter(s => s.locked).length;
+  const btn = document.getElementById('pushLockedBtn');
+  if (btn) btn.title = _lockedLayerCount
+    ? `Stuur ${_lockedLayerCount} vergrendeld object(en) naar leerlingen`
+    : 'Vergrendel alles en stuur naar leerlingen';
+}
+
+function pushLockedLayer() {
+  const all = teacherEngine.getStrokes();
+  const locked = all.filter(s => s.locked);
+  const toSend = locked.length > 0 ? locked : all.map(s => ({ ...s, locked: true }));
+  if (!toSend.length) { toast('Geen objecten om te vergrendelen', 'warn'); return; }
+  socket && socket.emit('push-locked-layer', { strokes: toSend });
+  toast(`${toSend.length} object(en) vergrendeld voor leerlingen`, 'success');
+  _lockedLayerCount = toSend.length;
+}
+
+function clearLockedLayer() {
+  socket && socket.emit('clear-locked-layer');
+  _lockedLayerCount = 0;
+  toast('Vergrendeling opgeheven bij leerlingen');
 }
 
 function showEmoteOnTile(studentId, emote) {

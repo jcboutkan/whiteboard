@@ -52,6 +52,7 @@ function makeRoom(teacherSocketId, teacherName, teacherId) {
     backgrounds: new Map(),    // studentId -> bgData
     teacherStrokes: [],
     teacherBackground: null,
+    lockedLayer: [],
     focusMode: false,
     createdAt: Date.now()
   };
@@ -123,6 +124,7 @@ io.on('connection', (socket) => {
       code: roomCode,
       teacherStrokes: room.teacherStrokes,
       teacherBackground: room.teacherBackground,
+      lockedLayer: room.lockedLayer,
       focusMode: room.focusMode,
       students
     });
@@ -150,6 +152,7 @@ io.on('connection', (socket) => {
         name: student.name,
         strokes: room.whiteboards.get(studentId) || [],
         background: room.backgrounds.get(studentId) || null,
+        lockedLayer: room.lockedLayer,
         focusMode: room.focusMode,
         teacherStrokes: room.focusMode ? room.teacherStrokes : null,
         teacherBackground: room.focusMode ? room.teacherBackground : null
@@ -192,6 +195,7 @@ io.on('connection', (socket) => {
         name: pending.name,
         strokes: [],
         background: null,
+        lockedLayer: room.lockedLayer,
         focusMode: room.focusMode,
         teacherStrokes: room.focusMode ? room.teacherStrokes : null,
         teacherBackground: room.focusMode ? room.teacherBackground : null
@@ -436,6 +440,39 @@ io.on('connection', (socket) => {
       libraries.set(teacherId, libraries.get(teacherId).filter(e => e.id !== id));
     }
     socket.emit('library-deleted', { id });
+  });
+
+  // Teacher stroke reorder / move sync
+  socket.on('update-teacher-strokes', ({ strokes }) => {
+    const { roomCode, role } = socket.data;
+    const room = rooms.get(roomCode);
+    if (!room || (role !== 'teacher' && role !== 'co-teacher')) return;
+    room.teacherStrokes = strokes || [];
+    if (room.focusMode) {
+      io.to(roomCode).emit('teacher-strokes-updated', { strokes: room.teacherStrokes });
+    }
+  });
+
+  // Push locked layer to all students
+  socket.on('push-locked-layer', ({ strokes }) => {
+    const { roomCode, role } = socket.data;
+    const room = rooms.get(roomCode);
+    if (!room || (role !== 'teacher' && role !== 'co-teacher')) return;
+    room.lockedLayer = strokes || [];
+    room.students.forEach(st => {
+      io.to(st.socketId).emit('locked-layer-set', { strokes: room.lockedLayer });
+    });
+  });
+
+  // Clear locked layer from all students
+  socket.on('clear-locked-layer', () => {
+    const { roomCode, role } = socket.data;
+    const room = rooms.get(roomCode);
+    if (!room || (role !== 'teacher' && role !== 'co-teacher')) return;
+    room.lockedLayer = [];
+    room.students.forEach(st => {
+      io.to(st.socketId).emit('locked-layer-cleared');
+    });
   });
 
   socket.on('request-sync', ({ studentId: reqId }) => {
